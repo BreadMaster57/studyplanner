@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!-- Tells the browser this is an HTML5 document -->
+<html lang="en">
+<head>
+    <!-- Character encoding so all symbols display correctly -->
+    <meta charset="UTF-8">
+    <!-- Title shown in the browser tab -->
+    <title>Study Planner</title>
+    <!-- Link to our CSS file for styling -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Load the Chart.js library for charts (from a CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ================== MAIN TITLE ================== -->
+<!-- A big title at the top. The style uses CSS variables to match the current theme (light/dark) -->
+<div style="text-align: center; padding: 20px 0 10px; font-size: 2rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px;">
+    📅 Study Planner
+</div>
+
+<!-- ================== DATE RANGE STATUS BAR ================== -->
+<!-- This is a small message that appears when you click a start date for a range selection.
+     It's hidden by default and only shows when needed -->
+<div id="selection-status" style="display:none; padding:8px 12px; margin:0 auto 10px; background:var(--button-bg); color:white; border-radius:6px; text-align:center; max-width:500px;"></div>
+
+<!-- ================== MAIN LAYOUT CONTAINER ================== -->
+<!-- The whole app is inside a flex container: sidebar on the left, main content on the right -->
+<div class="app-container">
+    
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+        
+        <!-- SUBJECTS & TOPICS CARD -->
+        <div class="card">
+            <!-- Collapsible header: click to show/hide the content -->
+            <h3 class="collapsible-header">📚 Subjects & Topics <span>▼</span></h3>
+            <!-- This div contains the collapsible part. Initially not collapsed. -->
+            <div class="collapsible-content">
+                <!-- Input field and button to add a new subject -->
+                <div style="display:flex; gap:5px; margin-bottom: 10px;">
+                    <input type="text" id="subject-input" placeholder="New Subject" style="margin:0;">
+                    <button id="add-subject-btn">Add</button>
+                </div>
+                <!-- List where all subjects will be rendered by JavaScript -->
+                <ul id="subject-list" style="list-style:none; padding:0;"></ul>
+            </div>
+        </div>
+        
+        <!-- CONFIGURATION CARD -->
+        <div class="card">
+            <h3 class="collapsible-header">⚙️ Configuration <span>▼</span></h3>
+            <div class="collapsible-content">
+                <!-- Dropdown for semester -->
+                <select id="sem-selector">
+                    <option value="Sem 1">Sem 1</option>
+                    <option value="Sem 2">Sem 2</option>
+                </select>
+                <!-- Dropdown for course (preset curriculums) -->
+                <select id="course-selector">
+                    <option value="Science">Science</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="TESL">TESL</option>
+                    <option value="Law">Law</option>
+                </select>
+                <!-- Button to load the selected preset -->
+                <button id="load-preset-btn" style="width:100%;">Load Preset</button>
+                <hr> <!-- horizontal line separator -->
+                
+                <!-- Number inputs to control how many subjects per day on weekdays/weekends -->
+                <label>Weekday: <input type="number" id="weekday-load" value="2"></label>
+                <label>Weekend: <input type="number" id="weekend-load" value="1"></label>
+                
+                <!-- Pomodoro timer settings -->
+                <label style="margin-top:10px;">Focus Duration (min): <input type="number" id="focus-duration" value="25" min="1" max="120"></label>
+                <label>Break Duration (min): <input type="number" id="break-duration" value="5" min="1" max="60"></label>
+
+                <!-- Dark mode toggle switch -->
+                <label style="display: flex; align-items: center; gap: 8px; margin-top: 15px;">
+                    <span>Dark Mode</span>
+                    <input type="checkbox" id="dark-mode-toggle">
+                </label>
+                
+                <!-- Reset button (styled with danger colour) -->
+                <button id="reset-btn" onclick="resetAllData()" style="background:#ef4444; width:100%; margin-top:10px;">Reset All Data</button>
+            </div>
+        </div>
+
+        <!-- ACTIVITY LOG CARD -->
+        <div class="card">
+            <h3 class="collapsible-header">🕒 Activity Log <span>▼</span></h3>
+            <div class="collapsible-content">
+                <!-- This list gets filled with recent study sessions -->
+                <ul id="activity-feed" style="list-style:none; padding:0; font-size:0.9rem;"></ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN CONTENT AREA ============ -->
+    <main class="main-content">
+        
+        <!-- TIMER SECTION (Focus mode, break, rating) -->
+        <section class="timer-section">
+            <!-- Today's objective (goal) -->
+            <div class="card">
+                <h2 id="objective-display" style="font-size:1.1rem; margin:0;">No goal set.</h2>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input type="text" id="objective-input" placeholder="Today's goal...">
+                    <button id="save-objective-btn">Save</button>
+                </div>
+            </div>
+
+            <!-- Study streak display -->
+            <div id="streak-display" style="font-size: 1.1rem; font-weight: bold; margin: 10px 0; color: #e67e22;"></div>
+
+            <!-- The big countdown timer -->
+            <h1 id="timer-display">25:00</h1>
+            
+            <!-- This shows which subject you're focusing on (updated when you select from dropdown) -->
+            <div id="active-subject-display" style="font-weight:bold; padding:10px; border-radius:6px; margin: 10px 0; display:none;"></div>
+            
+            <!-- Controls visible before starting a session -->
+            <div id="study-controls">
+                <!-- Dropdown to pick a subject -->
+                <select id="subject-selector" style="width:100%; margin-bottom:15px;"></select>
+                <button id="start-timer-btn" style="width:100%;">Start Session</button>
+            </div>
+            
+            <!-- Rating section appears after the timer ends -->
+            <div id="rating-section" style="display:none; text-align:center;">
+                <p>How was this session?</p>
+                <button class="rating-btn" data-value="1">1</button>
+                <button class="rating-btn" data-value="2">2</button>
+                <button class="rating-btn" data-value="3">3</button>
+                <button class="rating-btn" data-value="4">4</button>
+                <button class="rating-btn" data-value="5">5</button>
+            </div>
+
+            <!-- Break section appears after rating -->
+            <div id="break-section" style="display:none; text-align:center;">
+                <h2 id="break-display">05:00</h2>
+                <p>Take a well‑deserved break!</p>
+                <button id="skip-break-btn">Skip Break</button>
+            </div>
+        </section>
+
+        <!-- CALENDAR GRID (the monthly timetable) -->
+        <div id="calendar-grid" class="card"></div>
+
+        <!-- ANALYTICS CARD with two charts side by side -->
+        <div class="card">
+            <h3 class="collapsible-header">📊 Analytics <span>▼</span></h3>
+            <div class="collapsible-content">
+                <div class="charts-row">
+                    <!-- Each chart is inside a chart-box for layout -->
+                    <div class="chart-box"><canvas id="radarChart"></canvas></div>
+                    <div class="chart-box"><canvas id="volumeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ================== BACKUP & DATA CONTROL SECTION ================== -->
+<div class="card data-management-section" style="margin-top: 20px; padding: 15px; border: 1px solid var(--border); border-radius: 8px;">
+    <h3>Backup & Data Control</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+        <!-- Export all data as a JSON file -->
+        <button onclick="exportData()" style="padding: 8px 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            📥 Export Backup
+        </button>
+        <!-- Import data from a JSON file -->
+        <label for="import-file" style="padding: 8px 12px; background-color: #10b981; color: white; border-radius: 4px; cursor: pointer; display: inline-block;">
+            📤 Import Backup
+        </label>
+        <input type="file" id="import-file" accept=".json" onchange="importData(event)" style="display: none;">
+        <!-- Reset everything button -->
+        <button onclick="resetAllData()" style="padding: 8px 12px; background-color: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ⚠️ Reset All Data
+        </button>
+    </div>
+
+    <!-- ICS EXPORT (calendar file for Google/Apple Calendar) -->
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+        <strong style="display: block; margin-bottom: 10px;">📅 Export Calendar to ICS</strong>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Choose start time for the first session each day -->
+            <label style="display: flex; align-items: center; gap: 5px;">
+                Start:
+                <input type="time" id="ics-start-time" value="09:00" style="width: auto; margin: 0;">
+            </label>
+            <!-- Length of each study session in minutes -->
+            <label style="display: flex; align-items: center; gap: 5px;">
+                Duration (min):
+                <input type="number" id="ics-duration" value="60" min="5" max="240" style="width: 70px; margin: 0;">
+            </label>
+            <!-- Button to generate and download the .ics file -->
+            <button onclick="exportICS()" style="padding: 8px 12px; background-color: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Download .ics
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Load our JavaScript file at the end so all HTML elements exist before we try to access them -->
+<script src="app.js"></script>
+</body>
+</html>
