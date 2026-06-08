@@ -1,41 +1,34 @@
-/* ==========================================
-   CSS VARIABLES – like colour placeholders.
-   They change value when we switch to dark mode.
-   ========================================== */
 :root {
-    /* Light mode colours */
-    --bg: #f4f7f6;                 /* Page background */
-    --card-bg: #ffffff;            /* Card background */
-    --calendar-bg: #ebedef;        /* Calendar card background (slightly darker) */
-    --text: #374151;               /* Normal text colour */
-    --text-secondary: #6b7280;     /* Lighter text colour */
-    --header-bg: #f9fafb;          /* Background of collapsible headers */
-    --border: #e5e7eb;             /* Border colour */
-    --shadow: rgba(0,0,0,0.05);    /* Shadow for cards */
-    --input-bg: #ffffff;           /* Input field background */
-    --input-border: #d1d5db;       /* Input field border */
-    --button-bg: #4f46e5;          /* Button background */
-    --button-hover: #4338ca;       /* Button background when hovered */
-    --button-text: #ffffff;        /* Button text colour */
-    --progress-bg: #e5e7eb;        /* Progress bar background */
-    --progress-fill: #4f46e5;      /* Progress bar filled colour */
-    --calendar-hover: #f3f4f6;     /* Calendar cell when hovering */
-    --danger: #ef4444;             /* Danger/delete button colour */
+    --bg: #f4f7f6;
+    --card-bg: #ffffff;
+    --calendar-bg: #ebedef;
+    --text: #374151;
+    --text-secondary: #6b7280;
+    --header-bg: #f9fafb;
+    --border: #e5e7eb;
+    --shadow: rgba(0,0,0,0.05);
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --button-bg: #4f46e5;
+    --button-hover: #4338ca;
+    --button-text: #ffffff;
+    --progress-bg: #e5e7eb;
+    --progress-fill: #4f46e5;
+    --calendar-hover: #f3f4f6;
+    --danger: #ef4444;
     --danger-hover: #dc2626;
     --success: #10b981;
     --warning: #e67e22;
-    /* Heatmap colours for study activity intensity */
-    --heatmap-0: #ffffff;          /* No sessions */
-    --heatmap-1: #dbeafe;          /* 1 session */
-    --heatmap-2: #93c5fd;          /* 2 sessions */
-    --heatmap-3: #60a5fa;          /* 3 sessions */
-    --heatmap-4: #3b82f6;          /* 4+ sessions */
-    --blocked-bg: #ffcccb;         /* Background for blocked days */
-    --chart-text: #374151;         /* Chart label text colour */
-    --chart-grid: rgba(0,0,0,0.1); /* Chart grid line colour */
+    --heatmap-0: #ffffff;
+    --heatmap-1: #dbeafe;
+    --heatmap-2: #93c5fd;
+    --heatmap-3: #60a5fa;
+    --heatmap-4: #3b82f6;
+    --blocked-bg: #ffcccb;
+    --chart-text: #374151;
+    --chart-grid: rgba(0,0,0,0.1);
 }
 
-/* When the body has the class 'dark-mode', these colours override the light ones */
 body.dark-mode {
     --bg: #1e1f2e;
     --card-bg: #2a2b3d;
@@ -67,35 +60,32 @@ body.dark-mode {
     --chart-grid: rgba(255,255,255,0.1);
 }
 
-/* ================== BASE STYLES ================== */
 body {
-    background-color: var(--bg);      /* Use variable so it changes with theme */
+    background-color: var(--bg);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--text);
     margin: 0;
     padding: 0;
-    transition: background-color 0.3s, color 0.3s;  /* Smooth transition when switching themes */
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* ================== LAYOUT ================== */
 .app-container {
-    display: flex;               /* Side by side layout */
+    display: flex;
     gap: 20px;
     padding: 20px;
     max-width: 1200px;
-    margin: 0 auto;              /* Center the container */
+    margin: 0 auto;
 }
 
 .sidebar {
-    width: 300px;                /* Fixed width sidebar */
-    flex-shrink: 0;              /* Don't let it shrink */
+    width: 300px;
+    flex-shrink: 0;
 }
 
 .main-content {
-    flex-grow: 1;                /* Takes the remaining space */
+    flex-grow: 1;
 }
 
-/* ================== CARD STYLES ================== */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -107,21 +97,19 @@ body {
     transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-/* Special override for the calendar card to be slightly darker than day cells */
 #calendar-grid.card {
     background-color: var(--calendar-bg) !important;
 }
 
-/* ================== COLLAPSIBLE SECTIONS ================== */
 .collapsible-header {
     padding: 15px;
-    margin: -20px -20px 20px -20px;  /* Extend to the card edges */
+    margin: -20px -20px 20px -20px;
     cursor: pointer;
     background: var(--header-bg);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    user-select: none;             /* Prevent text selection when clicking */
+    user-select: none;
     font-size: 1.1rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
@@ -129,30 +117,27 @@ body {
 }
 
 .collapsible-content {
-    max-height: 2000px;            /* Large enough to show everything */
+    max-height: 2000px;
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
 }
 
-/* When collapsed, hide the content by making max-height 0 and invisible */
 .collapsible-content.collapsed {
     max-height: 0 !important;
     opacity: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     overflow: hidden !important;
-    pointer-events: none !important;   /* Disable clicks on hidden content */
+    pointer-events: none !important;
 }
 
-/* ================== CALENDAR GRID ================== */
 #calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);  /* 7 equal columns for days */
+    grid-template-columns: repeat(7, 1fr);
     gap: 5px;
 }
 
-/* Each day cell */
 #calendar-grid div {
     padding: 10px;
     border: 1px solid var(--border);
@@ -161,7 +146,7 @@ body {
     transition: background-color 0.2s;
     position: relative;
     min-height: 30px;
-    background-color: var(--heatmap-0);   /* Default: no sessions */
+    background-color: var(--heatmap-0);
     color: var(--text);
 }
 
@@ -169,7 +154,6 @@ body {
     background-color: var(--calendar-hover);
 }
 
-/* ================== PROGRESS BAR ================== */
 .progress-bar-container {
     width: 100%;
     background-color: var(--progress-bg);
@@ -183,10 +167,9 @@ body {
     height: 100%;
     background-color: var(--progress-fill);
     border-radius: 10px;
-    transition: width 0.5s ease-in-out;  /* Animate width change */
+    transition: width 0.5s ease-in-out;
 }
 
-/* ================== INPUTS & BUTTONS ================== */
 button {
     background-color: var(--button-bg);
     color: var(--button-text);
@@ -208,7 +191,7 @@ input, select {
     border-radius: 6px;
     font-size: 14px;
     width: 100%;
-    box-sizing: border-box;       /* Include padding in width calculation */
+    box-sizing: border-box;
     margin-bottom: 10px;
     background-color: var(--input-bg);
     color: var(--text);
@@ -218,7 +201,6 @@ input, select {
 #reset-btn { background-color: var(--danger); }
 #reset-btn:hover { background-color: var(--danger-hover); }
 
-/* ================== TIMER SECTION ================== */
 .timer-section {
     background: var(--card-bg);
     border-radius: 12px;
@@ -229,7 +211,7 @@ input, select {
 }
 
 .hidden-in-focus {
-    display: none !important;      /* Hide everything except timer when focusing */
+    display: none !important;
 }
 
 #exit-focus-btn {
@@ -243,7 +225,6 @@ input, select {
     cursor: pointer;
 }
 
-/* Checkboxes should not take full width */
 input[type="checkbox"] {
     cursor: pointer;
     width: auto;
@@ -254,16 +235,15 @@ input[type="checkbox"] {
     text-decoration: underline;
 }
 
-/* ================== CHART LAYOUT ================== */
 .charts-row {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
-    flex-wrap: wrap;          /* Allow wrapping on small screens */
+    flex-wrap: wrap;
 }
 
 .chart-box {
-    flex: 1 1 45%;            /* Each chart takes about half the width */
+    flex: 1 1 45%;
     min-width: 250px;
     background: var(--card-bg);
     border-radius: 8px;
